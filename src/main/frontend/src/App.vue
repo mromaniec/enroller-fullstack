@@ -8,7 +8,13 @@
     </div>
 
     <div v-else>
-      <LoginForm @login="(user) => logMeIn(user)"></LoginForm>
+        <button :class="signingup ? 'button-outline' : '' " @click="signingup = false" class ="button" href="#">Logowanie</button>
+        <button :class="!signingup ? 'button-outline' : '' " @click="signingup = true" >Rejestracja</button>
+
+      <div v-if="message" class="alert"> {{message}} </div>
+
+      <LoginForm v-if="!signingup" @login="(user) => logMeIn(user)"></LoginForm>
+      <LoginForm v-else @login="(user) => register(user)" button-label="Załóż konto"></LoginForm>
     </div>
   </div>
 </template>
@@ -18,11 +24,14 @@ import "milligram";
 import LoginForm from "./LoginForm";
 import UserPanel from "./UserPanel";
 import MeetingsPage from "./meetings/MeetingsPage";
+import axios from "axios";
 
 export default {
   components: {LoginForm, MeetingsPage, UserPanel},
   data() {
     return {
+      message: '',
+      signingup: false,
       authenticatedUsername: '',
     }
   },
@@ -32,6 +41,16 @@ export default {
     },
     logMeOut() {
       this.authenticatedUsername = '';
+    },
+
+    register(user) {
+      axios.post('/api/participants', user)
+          .then(response => {
+            this.message="konto założone";
+          })
+          .catch(response => {
+            this.message="nazwa istnieje!";
+          });
     }
   }
 }
@@ -41,5 +60,14 @@ export default {
 #app {
   max-width: 1000px;
   margin: 0 auto;
+}
+
+.alert{
+  padding: 5px;
+  margin: 10px;
+  border: 1px solid darkred;
+  font-size: 15px;
+  color: red;
+  text-align: center;
 }
 </style>
