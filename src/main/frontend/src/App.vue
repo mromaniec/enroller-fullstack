@@ -37,10 +37,22 @@ export default {
   },
   methods: {
     logMeIn(user) {
-      this.authenticatedUsername = user.login;
+      axios.post('/api/tokens', user)
+          .then(response => {
+            this.authenticatedUsername = user.login;
+            const token = response.data.token;
+            axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
+            axios.get('/api/meetings').then(response => console.log(response.data));
+          })
+          .catch(response => {
+            this.message = "logowanie nieudane";
+          })
     },
+
     logMeOut() {
+      delete axios.defaults.headers.common.Authorization;
       this.authenticatedUsername = '';
+      this.message = "wylogowano";
     },
 
     register(user) {
